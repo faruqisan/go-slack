@@ -1,7 +1,6 @@
 package slack
 
 import (
-	"errors"
 	"net/http"
 )
 
@@ -27,11 +26,11 @@ func New(opt Option) *Engine {
 func (e *Engine) Send(message string) error {
 
 	if e.opt.WebHookURL == "" {
-		return errors.New(errNoWebhookRegistered)
+		return ErrNoWebhookRegistered
 	}
 
 	if e.client == nil {
-		return errors.New(errEngineUsedWithoutNew)
+		return ErrEngineUsedWithoutNew
 	}
 
 	var (

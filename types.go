@@ -2,13 +2,13 @@ package slack
 
 import "net/http"
 
-// Engine ..
+// Engine struct act as function receiver
 type Engine struct {
 	opt    Option
 	client *http.Client
 }
 
-// Option ..
+// Option struct define configuration for engine
 type Option struct {
 	WebHookURL    string
 	Channel       string
