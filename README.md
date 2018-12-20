@@ -1,5 +1,7 @@
 # GO-SLACK
 
+[![Documentation](https://godoc.org/github.com/faruqisan/go-slack?status.svg)](https://godoc.org/github.com/faruqisan/go-slack)
+
 ## A simple golang slack API
 
 simple because it only send given message to a webhook url
