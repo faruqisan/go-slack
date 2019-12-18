@@ -22,10 +22,10 @@ func New(opt Option) *Engine {
 
 }
 
-// Send function post given message to webhook url
+// Send function post given message to webhook urls
 func (e *Engine) Send(message string) error {
 
-	if e.opt.WebHookURL == "" {
+	if len(e.opt.WebHookURLs) < 1 {
 		return ErrNoWebhookRegistered
 	}
 
@@ -34,14 +34,18 @@ func (e *Engine) Send(message string) error {
 	}
 
 	var (
-		err error
-		pl  payload
+		pl payload
 	)
 
 	pl.Text = message
 
-	err = e.doJSON(http.MethodPost, e.opt.WebHookURL, pl, nil)
+	for _, url := range e.opt.WebHookURLs {
+		err := e.doJSON(http.MethodPost, url, pl, nil)
+		if err != nil {
+			return err
+		}
+	}
 
-	return err
+	return nil
 
 }

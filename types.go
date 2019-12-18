@@ -10,7 +10,7 @@ type Engine struct {
 
 // Option struct define configuration for engine
 type Option struct {
-	WebHookURL    string
+	WebHookURLs   []string
 	Channel       string
 	CustomMessage string
 }
