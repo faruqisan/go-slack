@@ -66,3 +66,25 @@ func (e *Engine) doJSON(method string, path string, param, response interface{})
 	err = json.Unmarshal(resBody, response)
 	return err
 }
+
+func (e *Engine) doString(method string, path string, param, response interface{}) error {
+
+	var (
+		jsonByte []byte
+		resBody  []byte
+		err      error
+	)
+
+	jsonByte, err = json.Marshal(param)
+	if err != nil {
+		return err
+	}
+
+	resBody, err = e.do(method, path, jsonByte)
+	if err != nil {
+		return err
+	}
+
+	response = string(resBody)
+	return err
+}

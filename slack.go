@@ -43,7 +43,7 @@ func (e *Engine) Send(message string) error {
 	for _, url := range e.opt.WebHookURLs {
 
 		var resp string
-		err := e.doJSON(http.MethodPost, url, pl, &resp)
+		err := e.doString(http.MethodPost, url, pl, &resp)
 		if err != nil {
 			return err
 		}
