@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -40,9 +41,14 @@ func (e *Engine) Send(message string) error {
 	pl.Text = message
 
 	for _, url := range e.opt.WebHookURLs {
-		err := e.doJSON(http.MethodPost, url, pl, nil)
+
+		var resp string
+		err := e.doJSON(http.MethodPost, url, pl, &resp)
 		if err != nil {
 			return err
+		}
+		if resp != "ok" {
+			return fmt.Errorf("[go-slack] response is not ok : %s", resp)
 		}
 	}
 
