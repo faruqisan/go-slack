@@ -67,6 +67,8 @@ func (e *Engine) doJSON(method string, path string, param, response interface{})
 	return err
 }
 
+// doString function will perform http request with json param (if any)
+// and return string response (for not json response) like slack only response with " ok"
 func (e *Engine) doString(method string, path string, param interface{}) (string, error) {
 
 	var (

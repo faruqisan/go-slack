@@ -4,7 +4,10 @@
 
 ## A simple golang slack API
 
-simple because it only send given message to a webhook url
+Support Multiple Webhooks
+
+simple because it only send given message to a webhook url(s)
+
 
 ## Example
 
@@ -19,7 +22,7 @@ simple because it only send given message to a webhook url
 
     ```go
         opt := slack.Option{
-            WebHookURL: "PUT_YOUR_WEBHOOK_URL_HERE",
+            WebHookURLs: ["PUT_YOUR_WEBHOOK_URL_HERE"],
         }
     ```
 - **create the object with option**
@@ -36,6 +39,9 @@ simple because it only send given message to a webhook url
     if err != nil {
         //handle the error
     }
+
+    //or Send Async
+    sl.SendAsync("message")
     ```
 ## TODO
 
