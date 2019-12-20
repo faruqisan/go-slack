@@ -3,6 +3,7 @@ package slack
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // New function return configured go-slack engine.
@@ -26,6 +27,70 @@ func New(opt Option) *Engine {
 // Send function post given message to webhook urls
 func (e *Engine) Send(message string) error {
 
+	if err := e.validateClient(); err != nil {
+		return err
+	}
+
+	for _, url := range e.opt.WebHookURLs {
+		err := e.send(http.MethodPost, url, message)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
+
+// SendAsync function will send to all registered webhooks asynchronously
+// if theres any error, the error wil send to err chan
+func (e *Engine) SendAsync(message string) chan error {
+
+	var (
+		err     error
+		errChan = make(chan error)
+	)
+
+	if err = e.validateClient(); err != nil {
+		errChan <- err
+	}
+
+	for _, url := range e.opt.WebHookURLs {
+		go func(u string) {
+			err := e.send(http.MethodPost, u, message)
+			if err != nil {
+				errChan <- err
+			}
+		}(url)
+	}
+
+	return errChan
+}
+
+func (e *Engine) send(httpMethod, url string, message string) error {
+
+	var (
+		pl payload
+	)
+
+	pl.Text = e.opt.CustomMessage + message
+
+	resp, err := e.doString(httpMethod, url, pl)
+	if err != nil {
+		return err
+	}
+
+	// remove whitespace
+	resp = strings.ReplaceAll(resp, " ", "")
+
+	if resp != "ok" {
+		return fmt.Errorf("[go-slack] response is not ok : %s", resp)
+	}
+
+	return nil
+}
+
+func (e *Engine) validateClient() error {
 	if len(e.opt.WebHookURLs) < 1 {
 		return ErrNoWebhookRegistered
 	}
@@ -34,24 +99,5 @@ func (e *Engine) Send(message string) error {
 		return ErrEngineUsedWithoutNew
 	}
 
-	var (
-		pl payload
-	)
-
-	pl.Text = message
-
-	for _, url := range e.opt.WebHookURLs {
-
-		var resp string
-		err := e.doString(http.MethodPost, url, pl, &resp)
-		if err != nil {
-			return err
-		}
-		if resp != "ok" {
-			return fmt.Errorf("[go-slack] response is not ok : %s", resp)
-		}
-	}
-
 	return nil
-
 }
