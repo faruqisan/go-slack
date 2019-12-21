@@ -2,9 +2,9 @@ package slack
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 // New function return configured go-slack engine.
@@ -44,25 +44,38 @@ func (e *Engine) Send(message string) error {
 }
 
 // SendAsync function will send to all registered webhooks asynchronously
-func (e *Engine) SendAsync(message string) {
+// returning err chan for error info, channel will be closed when there's any error
+// or all process is done
+func (e *Engine) SendAsync(message string) chan error {
 
 	var (
-		err error
+		errChan = make(chan error)
+		err     error
+		wg      sync.WaitGroup
 	)
 
 	if err = e.validateClient(); err != nil {
-		log.Println("[go-slack] validation client error : ", err)
-		return
+		errChan <- err
+		close(errChan)
 	}
 
 	for _, url := range e.opt.WebHookURLs {
+		wg.Add(1)
 		go func(u string) {
+			defer wg.Done()
 			err := e.send(http.MethodPost, u, message)
 			if err != nil {
-				log.Println("[go-slack] send message error : ", err)
+				errChan <- err
 			}
 		}(url)
 	}
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	return errChan
 }
 
 func (e *Engine) send(httpMethod, url string, message string) error {
