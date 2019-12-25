@@ -49,7 +49,7 @@ func (e *Engine) Send(message string) error {
 func (e *Engine) SendAsync(message string) chan error {
 
 	var (
-		errChan = make(chan error)
+		errChan = make(chan error, 1)
 		err     error
 		wg      sync.WaitGroup
 	)
@@ -57,6 +57,7 @@ func (e *Engine) SendAsync(message string) chan error {
 	if err = e.validateClient(); err != nil {
 		errChan <- err
 		close(errChan)
+		return errChan
 	}
 
 	for _, url := range e.opt.WebHookURLs {
